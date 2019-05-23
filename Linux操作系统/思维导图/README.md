@@ -1,1 +1,1 @@
-![1558612714285](C:\Users\Jochebed\AppData\Local\Temp\1558612714285.png)
+![1558612714285](C:\Users\Jochebed\Desktop\KnowledgePoint\Linux操作系统\思维导图\Linux操作系统.png)
