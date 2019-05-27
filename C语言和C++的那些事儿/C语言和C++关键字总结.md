@@ -2,7 +2,7 @@
 
 ------
 
-   * [C语言和C  关键字总结](#c语言和c关键字总结)
+* [C语言和C  关键字总结](#c语言和c关键字总结)
       * [一、auto](#一auto)
             * [1、C语言](#1c语言)
             * [2、C  ](#2c)
@@ -20,22 +20,66 @@
             * [2、register修饰符暗示编译程序相应的变量将被频繁地使用](#2register修饰符暗示编译程序相应的变量将被频繁地使用)
             * [3、但是使用register修饰符有几点限制](#3但是使用register修饰符有几点限制)
       * [五、const](#五const)
+            * [1、const修饰普通类型的变量](#1const修饰普通类型的变量)
+            * [2、const 修饰指针变量](#2const-修饰指针变量)
+            * [3、const参数传递和函数返回值。](#3const参数传递和函数返回值)
+      * [4、const修饰类成员函数](#4const修饰类成员函数)
       * [六、volatile](#六volatile)
+            * [1、如何理解呢？](#1如何理解呢)
+            * [2、volatile将会用来修饰以下这些变量](#2volatile将会用来修饰以下这些变量)
+            * [3、当要求使用volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。而且读取的数据立刻被保存。](#3当要求使用volatile-声明的变量的值的时候系统总是重新从它所在的内存读取数据即使它前面的指令刚刚从该处读取过数据而且读取的数据立刻被保存)
       * [七、extern](#七extern)
+            * [1、<strong>基本解释</strong>](#1基本解释)
+            * [2、<strong>extern 变量</strong>](#2extern-变量)
+            * [3 、<strong>单方面修改extern 函数原型</strong>](#3-单方面修改extern-函数原型)
+            * [4、<strong>extern “C”</strong>](#4extern-c)
+            * [6、extern 和 static](#6extern-和-static)
+            * [7、extern 和const](#7extern-和const)
       * [八、sizeof](#八sizeof)
-      * [九、new](#九new)
-      * [十、delete](#十delete)
-      * [十一、const_cast](#十一const_cast)
-      * [十二、dynamic_cast](#十二dynamic_cast)
-      * [十三、reinterpret_cast](#十三reinterpret_cast)
-      * [十四、static_cast](#十四static_cast)
-      * [十五、explicit](#十五explicit)
-      * [十六、inline](#十六inline)
-      * [十七、operator](#十七operator)
-      * [十八、template](#十八template)
-      * [十九、decltype](#十九decltype)
-      * [二十、throw、try、catch](#二十throwtrycatch)
-      * [二十一、virtual](#二十一virtual)
+            * [1、与strlen()比较](#1与strlen比较)
+            * [2、指针与静态数组的sizeof操作](#2指针与静态数组的sizeof操作)
+            * [3、格式的写法](#3格式的写法)
+            * [4、使用sizeof时string的注意事项](#4使用sizeof时string的注意事项)
+            * [5、union 与struct的空间计算](#5union-与struct的空间计算)
+      * [九、new和delete](#九new和delete)
+            * [1、new 和 delete 到底是什么？](#1new-和-delete-到底是什么)
+            * [2、operator new 和 operator delete](#2operator-new-和-operator-delete)
+            * [3、new 和 delete 背后机制](#3new-和-delete-背后机制)
+            * [4、如何申请和释放一个数组？](#4如何申请和释放一个数组)
+            * [5、为什么 new/delete 、new []/delete[] 要配对使用？](#5为什么-newdelete-new-delete-要配对使用)
+      * [十、const_cast](#十const_cast)
+      * [十一、dynamic_cast](#十一dynamic_cast)
+      * [十二、reinterpret_cast](#十二reinterpret_cast)
+      * [十三、static_cast](#十三static_cast)
+      * [十四、explicit](#十四explicit)
+      * [十五、inline](#十五inline)
+            * [1、引入inline关键字的原因](#1引入inline关键字的原因)
+            * [2、inline使用限制](#2inline使用限制)
+            * [3、inline仅是一个对编译器的建议](#3inline仅是一个对编译器的建议)
+            * [4、建议：inline函数的定义放在头文件中](#4建议inline函数的定义放在头文件中)
+            * [5、类中的成员函数与inline](#5类中的成员函数与inline)
+            * [6、inline 是一种“用于实现的关键字”](#6inline-是一种用于实现的关键字)
+            * [7、慎用inline](#7慎用inline)
+            * [8、总结](#8总结)
+      * [十六、operator](#十六operator)
+            * [<strong>一、为什么使用操作符重载？</strong>](#一为什么使用操作符重载)
+            * [<strong>二、如何声明一个重载的操作符？</strong>](#二如何声明一个重载的操作符)
+      * [十七、template](#十七template)
+            * [C  模板](#c模板)
+            * [1、函数模板通式](#1函数模板通式)
+            * [2、类模板通式](#2类模板通式)
+            * [3、模板的形参](#3模板的形参)
+      * [十八、decltype](#十八decltype)
+      * [十九、throw、try、catch](#十九throwtrycatch)
+      * [二十、virtual](#二十virtual)
+            * [1、虚函数与运行多态](#1虚函数与运行多态)
+            * [2、虚函数中默认参数](#2虚函数中默认参数)
+            * [3、静态函数可以声明为虚函数吗？](#3静态函数可以声明为虚函数吗)
+            * [4、构造函数可以为虚函数吗？](#4构造函数可以为虚函数吗)
+            * [5、析构函数可以为虚函数吗？](#5析构函数可以为虚函数吗)
+            * [6、虚函数可以为私有函数吗？](#6虚函数可以为私有函数吗)
+            * [7、虚函数可以被内联吗？](#7虚函数可以被内联吗)
+            * [7、纯虚函数与抽象类](#7纯虚函数与抽象类)
 
 |        关键字        |                             意义                             | C/C++ |
 | :------------------: | :----------------------------------------------------------: | :---: |
@@ -1257,9 +1301,9 @@ delete pAa;
 		显然，**这里只对数组的第一个类对象调用了析构函数**，后面的两个对象均没调用析构函数，如果类对象中申请了大量的内存需要在析构函数中释放，而你却在销毁数组对象时少调用了析构函数，这会造成内存泄漏。
 
 		上面的问题你如果说没关系的话，那么第二点就是致命的了！直接释放 pAa 指向的内存空间，这个总是会造成严重的段错误，程序必然会奔溃！因为分配的空间的起始地址是 pAa 指向的地方减去 4 个字节的地方。你应该传入参数设为那个地址！
-	
+		
 		同理，你可以分析如果使用 new 来分配，用 `delete []` 来释放会出现什么问题？是不是总会导致程序错误？
-	
+		
 		总的来说，记住一点即可：**new/delete、new[]/delete[] 要配套使用总是没错的！**
 
 ## 十、const_cast
@@ -1689,9 +1733,9 @@ inline void Foo(int x, int y) {} // inline 与函数定义体放在一起
 
 - 操作符重载实现为类成员函数
 
-​	重载的操作符在类体中被声明，声明方式如同普通成员函数一样，只不过他的名字包含关键字**operator**，以及紧跟其后的一个c++预定义的操作符。
+		重载的操作符在类体中被声明，声明方式如同普通成员函数一样，只不过他的名字包含关键字**operator**，以及紧跟其后的一个c++预定义的操作符。
 
-​	可以用如下的方式来声明一个预定义的==操作符:
+		可以用如下的方式来声明一个预定义的==操作符:
 
 ```c++
 class person{
