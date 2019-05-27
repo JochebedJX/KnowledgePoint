@@ -1254,13 +1254,13 @@ delete pAa;
 - 调用一次 pAa 指向的对象的析构函数；
 - 调用 **operator delete(pAa);** 释放内存。
 
-​	显然，**这里只对数组的第一个类对象调用了析构函数**，后面的两个对象均没调用析构函数，如果类对象中申请了大量的内存需要在析构函数中释放，而你却在销毁数组对象时少调用了析构函数，这会造成内存泄漏。
+		显然，**这里只对数组的第一个类对象调用了析构函数**，后面的两个对象均没调用析构函数，如果类对象中申请了大量的内存需要在析构函数中释放，而你却在销毁数组对象时少调用了析构函数，这会造成内存泄漏。
 
-​	上面的问题你如果说没关系的话，那么第二点就是致命的了！直接释放 pAa 指向的内存空间，这个总是会造成严重的段错误，程序必然会奔溃！因为分配的空间的起始地址是 pAa 指向的地方减去 4 个字节的地方。你应该传入参数设为那个地址！
-
-​	同理，你可以分析如果使用 new 来分配，用 `delete []` 来释放会出现什么问题？是不是总会导致程序错误？
-
-​	总的来说，记住一点即可：**new/delete、new[]/delete[] 要配套使用总是没错的！**
+		上面的问题你如果说没关系的话，那么第二点就是致命的了！直接释放 pAa 指向的内存空间，这个总是会造成严重的段错误，程序必然会奔溃！因为分配的空间的起始地址是 pAa 指向的地方减去 4 个字节的地方。你应该传入参数设为那个地址！
+	
+		同理，你可以分析如果使用 new 来分配，用 `delete []` 来释放会出现什么问题？是不是总会导致程序错误？
+	
+		总的来说，记住一点即可：**new/delete、new[]/delete[] 要配套使用总是没错的！**
 
 ## 十、const_cast
 
@@ -1287,13 +1287,14 @@ delete pAa;
 	先看RTTI相关部分，通常，许多编译器都是通过vtable找到对象的RTTI信息的，这也就意味着，如果基类没有虚方法，也就无法判断一个基类指针变量所指对象的真实类型，这时候，dynamic_cast只能用来做安全的转换，例如从派生类指针转换成基类指针。而这种转换其实并不需要dynamic_cast参与。
 	也就是说，dynamic_cast是根据RTTI记载的信息来判断类型转换是否合法的。
 
-用法：同static_cast
+> 用法：同static_cast
+>
 
-dynamic_cast主要用于类层次结构中父类和子类之间指针和引用的转换，由于具有运行时类型检查，因此可以保证下行转换的安全性，何为安全性？即转换成功就返回转换后的正确类型指针，如果转换失败，则返回NULL，之所以说static_cast在下行转换时不安全，是因为即使转换失败，它也不返回NULL。
+​	dynamic_cast主要用于类层次结构中父类和子类之间指针和引用的转换，由于具有运行时类型检查，因此可以保证下行转换的安全性，何为安全性？即转换成功就返回转换后的正确类型指针，如果转换失败，则返回NULL，之所以说static_cast在下行转换时不安全，是因为即使转换失败，它也不返回NULL。
 
-对于上行转换，dynamic_cast和static_cast是一样的。
+​	对于上行转换，dynamic_cast和static_cast是一样的。
 
-对于下行转换，说到下行转换，有一点需要了解的是在C++中，一般是可以用父类指针指向一个子类对象，如parent* P1 = new Children(); 但这个指针只能访问父类定义的数据成员和函数，这是C++中的静态联翩，但一般不定义指向父类对象的子类类型指针，如Children* P1 = new parent；这种定义方法不符合生活习惯，在程序设计上也很麻烦。**这就解释了也说明了，在上行转换中，static_cast和dynamic_cast效果是一样的，而且都比较安全，因为向上转换的对象一般是指向子类对象的子类类型指针；而在下行转换中，由于可以定义就不同了指向子类对象的父类类型指针，同时static_cast只在编译时进行类型检查，而dynamic_cast是运行时类型检查，则需要视情况而定。**下面通过代码进行说明
+​	对于下行转换，说到下行转换，有一点需要了解的是在C++中，一般是可以用父类指针指向一个子类对象，如parent* P1 = new Children(); 但这个指针只能访问父类定义的数据成员和函数，这是C++中的静态联翩，但一般不定义指向父类对象的子类类型指针，如Children* P1 = new parent；这种定义方法不符合生活习惯，在程序设计上也很麻烦。**这就解释了也说明了，在上行转换中，static_cast和dynamic_cast效果是一样的，而且都比较安全，因为向上转换的对象一般是指向子类对象的子类类型指针；而在下行转换中，由于可以定义就不同了指向子类对象的父类类型指针，同时static_cast只在编译时进行类型检查，而dynamic_cast是运行时类型检查，则需要视情况而定。**下面通过代码进行说明
 
 ```c++
 class Base
@@ -1306,7 +1307,7 @@ class Derived:public Base
 };
 ```
 
-由于需要进行向下转换，因此需要定义一个**父类类型的指针Base \*P**，但是由于子类继承与父类，父类指针可以指向父类对象，也可以指向子类对象，这就是重点所在。如果 **P**指向的确实是子类对象，则dynamic_cast和static_cast都可以转换成功，如下所示： 
+​	由于需要进行向下转换，因此需要定义一个**父类类型的指针Base \*P**，但是由于子类继承与父类，父类指针可以指向父类对象，也可以指向子类对象，这就是重点所在。如果 **P**指向的确实是子类对象，则dynamic_cast和static_cast都可以转换成功，如下所示： 
 
 ```
 Base *P = new Derived();
@@ -1314,9 +1315,9 @@ Derived *pd1 = static_cast<Derived *>(P);
 Derived *pd2 = dynamic_cast<Derived *>(P);
 ```
 
-以上转换都能成功。
+​	以上转换都能成功。
 
-但是，如果 **P** 指向的不是子类对象，而是父类对象，如下所示：
+​	但是，如果 **P** 指向的不是子类对象，而是父类对象，如下所示：
 
 ```c++
 Base *P = new Base;
@@ -1324,35 +1325,84 @@ Derived *pd3 = static_cast<Derived *>(P);
 Derived *pd4 = dynamic_cast<Derived *>(P);
 ```
 
-在以上转换中，static_cast转换在编译时不会报错，也可以返回一个子类对象指针（假想），但是这样是不安全的，在运行时可能会有问题，因为子类中包含父类中没有的数据和函数成员，这里需要理解转换的字面意思，转换是什么？转换就是把对象从一种类型转换到另一种类型，如果这时用 pd3 去访问子类中有但父类中没有的成员，就会出现访问越界的错误，导致程序崩溃。而dynamic_cast由于具有运行时类型检查功能，它能检查P的类型，由于上述转换是不合理的，所以它返回NULL。 
+​	在以上转换中，static_cast转换在编译时不会报错，也可以返回一个子类对象指针（假想），但是这样是不安全的，在运行时可能会有问题，因为子类中包含父类中没有的数据和函数成员，这里需要理解转换的字面意思，转换是什么？转换就是把对象从一种类型转换到另一种类型，如果这时用 pd3 去访问子类中有但父类中没有的成员，就会出现访问越界的错误，导致程序崩溃。而dynamic_cast由于具有运行时类型检查功能，它能检查P的类型，由于上述转换是不合理的，所以它返回NULL。 
 
-**三、总结**
+**总结**
 
-C++中层次类型转换中无非两种：上行转换和下行转换
+​	C++中层次类型转换中无非两种：上行转换和下行转换
 
-对于上行转换，static_cast和dynamic_cast效果一样，都安全；
+​	对于上行转换，static_cast和dynamic_cast效果一样，都安全；
 
-对于下行转换：你必须确定要转换的数据确实是目标类型的数据，即需要注意要转换的父类类型指针是否真的指向子类对象，如果是，static_cast和dynamic_cast都能成功；如果不是static_cast能返回，但是不安全，可能会出现访问越界错误，而dynamic_cast在运行时类型检查过程中，判定该过程不能转换，返回NULL。
+​	对于下行转换：你必须确定要转换的数据确实是目标类型的数据，即需要注意要转换的父类类型指针是否真的指向子类对象，如果是，static_cast和dynamic_cast都能成功；如果不是static_cast能返回，但是不安全，可能会出现访问越界错误，而dynamic_cast在运行时类型检查过程中，判定该过程不能转换，返回NULL。
 
-注：
+> ​	注：虚函数对于dynamic_cast转换的作用？为何使用dynamic_cast转换类指针时，需要虚函数呢？
+>
 
-虚函数对于dynamic_cast转换的作用
+​	Dynamic_cast转换是在运行时进行转换，运行时转换就需要知道类对象的信息（继承关系等）。
 
-　　为何使用dynamic_cast转换类指针时，需要虚函数呢。
+​	如何在运行时获取到这个信息------虚函数表。
 
-Dynamic_cast转换是在运行时进行转换，运行时转换就需要知道类对象的信息（继承关系等）。
+　　C++对象模型中，对象实例最前面的就是虚函数表指针，通过这个指针可以获取到该类对象的所有虚函数，包括父类的。
 
-如何在运行时获取到这个信息——虚函数表。
-
-　　C++对象模型中，对象实例最前面的就是虚函数表指针，
-
-通过这个指针可以获取到该类对象的所有虚函数，包括父类的。
-
-因为派生类会继承基类的虚函数表，所以通过这个虚函数表，我们就可以知道该类对象的父类，在转换的时候就可以用来判断对象有无继承关系。
+​	因为派生类会继承基类的虚函数表，所以通过这个虚函数表，我们就可以知道该类对象的父类，在转换的时候就可以用来判断对象有无继承关系。
 
 　　**所以虚函数对于正确的基类指针转换为子类指针是非常重要的。**
 
 ## 十二、reinterpret_cast
+
+​	允许将任何指针转换为任何其他指针类型。也允许将任何整数类型转换为任何指针类型以及反向转换。 
+
+> 语法：
+
+> reinterpret_cast < type-id > ( expression )
+
+- 滥用 reinterpret_cast 运算符可能很容易带来风险。除非所需转换本身是低级别的，否则应使用其他强制转换运算符之一。
+- reinterpret_cast 运算符可用于 char* 到 int* 或 One_class* 到 Unrelated_class* 之类的转换，这本身并不安全。
+- reinterpret_cast 的结果不能安全地用于除强制转换回其原始类型以外的任何用途。在最好的情况下，其他用途也是不可移植的。
+- reinterpret_cast 运算符不能丢掉 const、volatile 或 __unaligned 特性。有关移除这些特性的详细信息，请参阅 const_cast Operator。
+- reinterpret_cast 运算符将 null 指针值转换为目标类型的 null 指针值。
+- reinterpret_cast 的一个实际用途是在哈希函数中，即，通过让两个不同的值几乎不以相同的索引结尾的方式将值映射到索引。
+
+```c++
+#include <iostream>
+using namespace std;
+
+// Returns a hash code based on an address
+unsigned short Hash( void *p ) {
+  unsigned int val = reinterpret_cast<unsigned int>( p );
+  return ( unsigned short )( val ^ (val >> 16));
+}
+
+int main() {
+	int a[20];
+	for ( int i = 0; i < 20; i++ )
+		cout << Hash( a + i ) << endl;
+}
+
+Output: 
+64641
+64645
+64889
+64893
+64881
+64885
+64873
+64877
+64865
+64869
+64857
+64861
+64849
+64853
+64841
+64845
+64833
+64837
+64825
+64829
+```
+
+​	reinterpret_cast 允许将指针视为整数类型。结果随后将按位移位并与自身进行“异或”运算以生成唯一的索引（具有唯一性的概率非常高）。该索引随后被标准 C 样式强制转换截断为函数的返回类型。
 
 ## 十三、static_cast
 
@@ -1367,21 +1417,1034 @@ Dynamic_cast转换是在运行时进行转换，运行时转换就需要知道�
 3. 把任何类型的表达式类型转换成void类型
 4. 用于类层次结构中父类和子类之间指针和引用的转换。
 
-​	对于以上第（4）点，存在两种形式的转换，即上行转换（子类到父类）和下行转换（父类到子类）。对于static_cast，上行转换时安全的，而下行转换时不安全的，为什么呢？因为static_cast的转换时粗暴的，它仅根据类型转换语句中提供的信息（尖括号中的类型）来进行转换，这种转换方式对于上行转换，由于子类总是包含父类的所有数据成员和函数成员，因此从子类转换到父类的指针对象可以没有任何顾虑的访问其（指父类）的成员。而对于下行转换为什么不安全，是因为static_cast只是在编译时进行类型坚持，没有运行时的类型检查，具体原理在dynamic_cast中说明。
+		对于以上第（4）点，存在两种形式的转换，即上行转换（子类到父类）和下行转换（父类到子类）。对于static_cast，上行转换时安全的，而下行转换时不安全的，为什么呢？因为static_cast的转换时粗暴的，它仅根据类型转换语句中提供的信息（尖括号中的类型）来进行转换，这种转换方式对于上行转换，由于子类总是包含父类的所有数据成员和函数成员，因此从子类转换到父类的指针对象可以没有任何顾虑的访问其（指父类）的成员。而对于下行转换为什么不安全，是因为static_cast只是在编译时进行类型坚持，没有运行时的类型检查，具体原理在dynamic_cast中说明。
 
 ## 十四、explicit
 
+​	首先, C++中的explicit关键字只能用于修饰只有一个参数的类构造函数, 它的作用是表明该构造函数是显示的, 而非隐式的, 跟它相对应的另一个关键字是implicit, 意思是隐藏的,类构造函数默认情况下即声明为implicit(隐式).
+
+​	那么显示声明的构造函数和隐式声明的有什么区别呢? 我们来看下面的例子:
+
+```c++
+class CxString  // 没有使用explicit关键字的类声明, 即默认为隐式声明  
+{  
+public:  
+    char *_pstr;  
+    int _size;  
+    CxString(int size)  
+    {  
+        _size = size;                // string的预设大小  
+        _pstr = malloc(size + 1);    // 分配string的内存  
+        memset(_pstr, 0, size + 1);  
+    }  
+    CxString(const char *p)  
+    {  
+        int size = strlen(p);  
+        _pstr = malloc(size + 1);    // 分配string的内存  
+        strcpy(_pstr, p);            // 复制字符串  
+        _size = strlen(_pstr);  
+    }  
+    // 析构函数这里不讨论, 省略...  
+};  
+  
+    // 下面是调用:  
+  
+    CxString string1(24);     // 这样是OK的, 为CxString预分配24字节的大小的内存  
+    CxString string2 = 10;    // 这样是OK的, 为CxString预分配10字节的大小的内存  
+    CxString string3;         // 这样是不行的, 因为没有默认构造函数, 错误为: “CxString”: 没有合适的默认构造函数可用  
+    CxString string4("aaaa"); // 这样是OK的  
+    CxString string5 = "bbb"; // 这样也是OK的, 调用的是CxString(const char *p)  
+    CxString string6 = 'c';   // 这样也是OK的, 其实调用的是CxString(int size), 且size等于'c'的ascii码  
+    string1 = 2;              // 这样也是OK的, 为CxString预分配2字节的大小的内存  
+    string2 = 3;              // 这样也是OK的, 为CxString预分配3字节的大小的内存  
+    string3 = string1;        // 这样也是OK的, 至少编译是没问题的, 但是如果析构函数里用free释放_pstr内存指针的时候可能会报错, 完整的代码必须重载运算符"=", 并在其中处理内存释放
+```
+
+​	上面的代码中, "CxString string2 = 10;" 这句为什么是可以的呢? 在C++中, 如果的构造函数只有一个参数时, 那么在编译的时候就会有一个缺省的转换操作:将该构造函数对应数据类型的数据转换为该类对象. 也就是说 "CxString string2 = 10;" 这段代码, 编译器自动将整型转换为CxString类对象, 实际上等同于下面的操作: 
+
+```c++
+CxString string2(10);  
+//或  
+CxString temp(10);  
+CxString string2 = temp;  
+```
+
+​	但是, 上面的代码中的_size代表的是字符串内存分配的大小, 那么调用的第二句 "CxString string2 = 10;" 和第六句 "CxString string6 = 'c';" 就显得不伦不类, 而且容易让人疑惑。有什么办法阻止这种用法呢? 答案就是使用explicit关键字。我们把上面的代码修改一下, 如下: 
+
+```c++
+class CxString  // 使用关键字explicit的类声明, 显示转换  
+{  
+public:  
+    char *_pstr;  
+    int _size;  
+    explicit CxString(int size)  
+    {  
+        _size = size;  
+        // 代码同上, 省略...  
+    }  
+    CxString(const char *p)  
+    {  
+        // 代码同上, 省略...  
+    }  
+};  
+  
+    // 下面是调用:  
+  
+    CxString string1(24);     // 这样是OK的  
+    CxString string2 = 10;    // 这样是不行的, 因为explicit关键字取消了隐式转换  
+    CxString string3;         // 这样是不行的, 因为没有默认构造函数  
+    CxString string4("aaaa"); // 这样是OK的  
+    CxString string5 = "bbb"; // 这样也是OK的, 调用的是CxString(const char *p)  
+    CxString string6 = 'c';   // 这样是不行的, 其实调用的是CxString(int size), 且size等于'c'的ascii码, 但explicit关键字取消了隐式转换  
+    string1 = 2;              // 这样也是不行的, 因为取消了隐式转换  
+    string2 = 3;              // 这样也是不行的, 因为取消了隐式转换  
+    string3 = string1;        // 这样也是不行的, 因为取消了隐式转换, 除非类实现操作符"="的重载
+```
+
+​	explicit关键字的作用就是防止类构造函数的隐式自动转换。上面也已经说过了, explicit关键字只对有一个参数的类构造函数有效, 如果类构造函数参数大于或等于两个时, 是不会产生隐式转换的, 所以explicit关键字也就无效了。例如:  
+
+```c++
+class CxString  // explicit关键字在类构造函数参数大于或等于两个时无效  
+{  
+public:  
+    char *_pstr;  
+    int _age;  
+    int _size;  
+    explicit CxString(int age, int size)  
+    {  
+        _age = age;  
+        _size = size;  
+        // 代码同上, 省略...  
+    }  
+    CxString(const char *p)  
+    {  
+        // 代码同上, 省略...  
+    }  
+};  
+  
+    // 这个时候有没有explicit关键字都是一样的
+```
+
+​	但是, 也有一个例外, 就是当除了第一个参数以外的其他参数都有默认值的时候, explicit关键字依然有效, 此时, 当调用构造函数时只传入一个参数, 等效于只有一个参数的类构造函数, 例子如下: 
+
+```c++
+class CxString  // 使用关键字explicit声明  
+{  
+public:  
+    int _age;  
+    int _size;  
+    explicit CxString(int age, int size = 0)  
+    {  
+        _age = age;  
+        _size = size;  
+        // 代码同上, 省略...  
+    }  
+    CxString(const char *p)  
+    {  
+        // 代码同上, 省略...  
+    }  
+};  
+  
+    // 下面是调用:  
+  
+    CxString string1(24);     // 这样是OK的  
+    CxString string2 = 10;    // 这样是不行的, 因为explicit关键字取消了隐式转换  
+    CxString string3;         // 这样是不行的, 因为没有默认构造函数  
+    string1 = 2;              // 这样也是不行的, 因为取消了隐式转换  
+    string2 = 3;              // 这样也是不行的, 因为取消了隐式转换  
+    string3 = string1;        // 这样也是不行的, 因为取消了隐式转换, 除非类实现操作符"="的重载
+```
+
+​	以上即为C++ explicit关键字的详细介绍。
+
+> 总结：
+
+​        **explicit关键字只需用于类内的单参数构造函数前面。由于无参数的构造函数和多参数的构造函数总是显示调用，这种情况在构造函数前加explicit无意义。**
+
+​	**google的c++规范中提到explicit的优点是可以避免不合时宜的类型变换，缺点无。所以google约定所有单参数的构造函数都必须是显示的，只有极少数情况下拷贝构造函数可以不声明称explicit。例如作为其他类的透明包装器的类。**
+　　**effective c++中说：被声明为explicit的构造函数通常比其non-explicit兄弟更受欢迎。因为它们禁止编译器执行非预期（往往也不被期望）的类型转换。除非我有一个好理由允许构造函数被用于隐式类型转换，否则我会把它声明为explicit，鼓励大家遵循相同的政策。**
+
+
+
 ## 十五、inline
+
+#### 1、引入inline关键字的原因
+
+​	在c/c++中，为了解决一些频繁调用的小函数大量消耗栈空间（栈内存）的问题，特别的引入了inline修饰符，表示为内联函数。
+
+​	栈空间就是指放置程序的局部数据（也就是函数内数据）的内存空间。
+
+​	在系统下，栈空间是有限的，假如频繁大量的使用就会造成因栈空间不足而导致程序出错的问题，如，函数的死循环递归调用的最终结果就是导致栈内存空间枯竭。
+
+​	下面我们来看一个例子：
+
+```c++
+#include <stdio.h>
+//函数定义为inline即:内联函数
+inline char* dbtest(int a) {
+    return (i % 2 > 0) ? "奇" : "偶";
+} 
+int main()
+{
+   int i = 0;
+   for (i=1; i < 100; i++) {
+       printf("i:%d    奇偶性:%s /n", i, dbtest(i));    
+   }
+}
+```
+
+​	上面的例子就是标准的内联函数的用法，使用inline修饰带来的好处我们表面看不出来，其实，在内部的工作就是在每个for循环的内部任何调用dbtest(i)的地方都换成了(i%2>0)?”奇”:”偶”，这样就避免了频繁调用函数对栈内存重复开辟所带来的消耗。
+
+#### 2、inline使用限制
+
+​	inline的使用是有所限制的，inline只适合函数体内代码简单的函数使用，不能包含复杂的结构控制语句例如while、switch，并且不能内联函数本身不能是直接递归函数（即，自己内部还调用自己的函数）。
+
+#### 3、inline仅是一个对编译器的建议
+
+​	inline函数仅仅是一个对编译器的建议，所以最后能否真正内联，看编译器的意思，它如果认为函数不复杂，能在调用点展开，就会真正内联，并不是说声明了内联就会内联，声明内联只是一个建议而已。
+
+#### 4、建议：inline函数的定义放在头文件中
+
+​	其次，因为内联函数要在调用点展开，所以编译器必须随处可见内联函数的定义，要不然就成了非内联函数的调用了。所以，这要求每个调用了内联函数的文件都出现了该内联函数的定义。
+
+​	因此，**将内联函数的定义放在头文件里实现是合适的，省却你为每个文件实现一次的麻烦**。
+
+​	声明跟定义要一致：如果在每个文件里都实现一次该内联函数的话，那么，最好保证每个定义都是一样的，否则，将会引起未定义的行为。如果不是每个文件里的定义都一样，那么，编译器展开的是哪一个，那要看具体的编译器而定。所以，最好将内联函数定义放在头文件中。
+
+#### 5、类中的成员函数与inline
+
+​	定义在类中的成员函数缺省都是内联的，如果在类定义时就在类内给出函数定义，那当然最好。如果在类中未给出成员函数定义，而又想内联该函数的话，那在类外要加上inline，否则就认为不是内联的。
+
+​	例如：
+
+```c++
+class A
+{
+    public:void Foo(int x, int y) {  } // 自动地成为内联函数
+}
+```
+
+​	将成员函数的定义体放在类声明之中虽然能带来书写上的方便，但不是一种良好的编程风格，上例应该改成：
+
+```c++
+// 头文件
+class A
+{
+    public:
+    void Foo(int x, int y);
+}
+
+// 定义文件
+inline void A::Foo(int x, int y){} 
+```
+
+#### 6、inline 是一种“用于实现的关键字”
+
+​	关键字inline 必须与函数定义体放在一起才能使函数成为内联，仅将inline 放在函数声明前面不起任何作用。
+
+如下风格的函数Foo 不能成为内联函数：
+
+```c++
+inline void Foo(int x, int y); // inline 仅与函数声明放在一起
+void Foo(int x, int y){}
+```
+
+而如下风格的函数Foo 则成为内联函数：
+
+```c++
+void Foo(int x, int y);
+inline void Foo(int x, int y) {} // inline 与函数定义体放在一起
+```
+
+​	所以说，inline 是一种“**用于实现的关键字**”，而不是一种“用于声明的关键字”。一般地，用户可以阅读函数的声明，但是看不到函数的定义。尽管在大多数教科书中内联函数的声明、定义体前面都加了inline 关键字，但我认为inline不应该出现在函数的声明中。这个细节虽然不会影响函数的功能，但是体现了高质量C++/C 程序设计风格的一个基本原则：声明与定义不可混为一谈，用户没有必要、也不应该知道函数是否需要内联。
+
+#### 7、慎用inline
+
+​	内联能提高函数的执行效率，为什么不把所有的函数都定义成内联函数？如果所有的函数都是内联函数，还用得着“内联”这个关键字吗？ 
+	内联是以代码膨胀（复制）为代价，仅仅省去了函数调用的开销，从而提高函数的执行效率。 
+	如果执行函数体内代码的时间，相比于函数调用的开销较大，那么效率的收获会很少。另一方面，每一处内联函数的调用都要复制代码，将使程序的总代码量增大，消耗更多的内存空间。
+
+> ​	以下情况不宜使用内联： 
+
+1. 如果函数体内的代码比较长，使用内联将导致内存消耗代价较高。 
+2. 如果函数体内出现循环，那么执行函数体内代码的时间要比函数调用的开销大。类的构造函数和析构函数容易让人误解成使用内联更有效。要当心构造函数和析构函数可能会隐藏一些行为，如“偷偷地”执行了基类或成员对象的构造函数和析构函数。所以不要随便地将构造函数和析构函数的定义体放在类声明中。一个好的编译器将会根据函数的定义体，自动地取消不值得的内联（这进一步说明了 inline 不应该出现在函数的声明中）。
+
+#### 8、总结
+
+​	内联函数并不是一个增强性能的灵丹妙药。只有当函数非常短小的时候它才能得到我们想要的效果；但是，如果函数并不是很短而且在很多地方都被调用的话，那么将会使得可执行体的体积增大。 
+
+​	最令人烦恼的还是当编译器拒绝内联的时候。在老的实现中，结果很不尽人意，虽然在新的实现中有很大的改善，但是仍然还是不那么完善的。一些编译器能够足够的聪明来指出哪些函数可以内联哪些不能，但是大多数编译器就不那么聪明了，因此这就需要我们的经验来判断。如果内联函数不能增强性能，就避免使用它！
 
 ## 十六、operator
 
+​	operator是C++的关键字，它和运算符一起使用，表示一个运算符函数，理解时应将operator=整体上视为一个函数名。
+
+​	这是C++扩展运算符功能的方法，虽然样子古怪，但也可以理解：一方面要使运算符的使用方法与其原来一致，另一方面扩展其功能只能通过函数的方式（c++中，“功能”都是由函数实现的)。
+
+#### **一、为什么使用操作符重载？**
+
+​	对于系统的所有操作符，一般情况下，只支持基本数据类型和标准库中提供的class，对于用户自己定义的class，如果想支持基本操作，比如比较大小，判断是否相等，等等，则需要用户自己来定义关于这个操作符的具体实现。比如，判断两个人是否一样大，我们默认的规则是按照其年龄来比较，所以，在设计person 这个class的时候，我们需要考虑操作符==，而且，根据刚才的分析，比较的依据应该是age。那么为什么叫重载呢？这是因为，在编译器实现的时候，已经为我们提供了这个操作符的基本数据类型实现版本，但是现在他的操作数变成了用户定义的数据类型class，所以，需要用户自己来提供该参数版本的实现。
+
+#### **二、如何声明一个重载的操作符？**
+
+- 操作符重载实现为类成员函数
+
+​	重载的操作符在类体中被声明，声明方式如同普通成员函数一样，只不过他的名字包含关键字**operator**，以及紧跟其后的一个c++预定义的操作符。
+
+​	可以用如下的方式来声明一个预定义的==操作符:
+
+```c++
+class person{
+private:
+    int age;
+    public:
+    person(int a){
+       this->age=a;
+    }
+   inline bool operator == (const person &ps) const;
+};
+```
+
+
+实现方式如下：
+
+```c++
+inline bool person::operator==(const person &ps) const
+{
+	if (this->age==ps.age)
+        return true;
+     return false;
+}
+```
+
+调用方式如下：
+
+```c++
+int main()
+{
+  person p1(10);
+  person p2(20);
+  if(p1==p2) cout<<"the age is equal!"<<endl;
+  return 0;
+}
+```
+
+​	这里，因为operator ==是class person的一个成员函数，所以对象p1,p2都可以调用该函数，上面的if语句中，相当于p1调用函数==，把p2作为该函数的一个参数传递给该函数，从而实现了两个对象的比较。
+
+- 操作符重载实现为非类成员函数(全局函数)
+
+  对于全局重载操作符，代表左操作数的参数必须被显式指定。例如：
+
+  ```c++
+  class person
+  {
+  public:
+  	int age;
+  	bool operator==(person const &p1 ,person const & p2);
+  };
+  //满足要求，做操作数的类型被显示指定
+  bool person::operator==(person const &p1 ,person const & p2)
+  {
+  	if(p1.age==p2.age)
+  		return true;
+  	return false;
+  }
+  int main()
+  {
+  	person rose;
+  	person jack;
+  	rose.age=18;
+  	jack.age=23;
+  	if(rose==jack)
+  		cout<<"ok"< return 0;
+  }
+  ```
+
+- 如何决定把一个操作符重载为类成员函数还是全局名字空间的成员呢？
+
+1. 如果一个重载操作符是类成员，那么只有当与他一起使用的左操作数是该类的对象时，该操作符才会被调用。如果该操作符的左操作数必须是其他的类型，则操作符必须被重载为全局名字空间的成员。
+2. C++要求赋值=，下标[]，调用()， 和成员指向-> 操作符必须被定义为类成员操作符。任何把这些操作符定义为名字空间成员的定义都会被标记为编译时刻错误。
+3. 如果有一个操作数是类类型如string类的情形那么对于对称操作符比如等于操作符最好定义为全局名字空间成员。
+
+- 重载操作符具有以下限制：
+
+1. 只有C++预定义的操作符集中的操作符才可以被重载；
+
+[![img](http://hiphotos.baidu.com/%BA%DA_%B0%D7/pic/item/8a69b91f8dc63a11f724e415.jpg)](http://photo.blog.sina.com.cn/showpic.html#blogid=4b3c1f950100kker&url=http://s12.sinaimg.cn/orignal/4b3c1f95t8c9729d4731b)
+
+2. 对于内置类型的操作符，它的预定义不能被改变，应不能为内置类型重载操作符，如，不能改变int型的操作符+的含义；
+3. 也不能为内置的数据类型定义其它的操作符；
+4. 只能重载类类型或枚举类型的操作符；
+5. 重载操作符不能改变它们的操作符优先级；
+
+6. 重载操作符不能改变操作数的个数；
+7. 除了对( )操作符外，对其他重载操作符提供缺省实参都是非法的；
+
+- **注意点**
+
+1. 后果载操操作符首先要确定它的返回值是左值，还是右值，如果是左值最返回引用，如果是右值那就直接返回值；
+2. +号等这样的操作符没有对象可以容纳改变后值，对于这样的情况最好返回数值，否则只能要操作符体内创建临时对象用于容纳改变后的值，如果在堆中创建临时对象返回指针或者引用，在操作符函数体外还需要释放它，如果返回的对象而不是引用或者指针，那么效率是比较低的。如果返回的是数值，最好在该类的构造函数中增加对该类型数值的转换函数，如：返回值是int类型，那么最好有一个int类型作为参数的构造函数。
+
+3. 在增量运算符中，放上一个整数形参，就是后增量运行符，它是值返回，对于前增量没有形参，而且是引用返回，示例：
+
+```c++
+class Test
+{
+    public:
+    Test(x=3){ m_value = x}
+    Test &operator ++();   //前增量
+    Test &operator ++(int);//后增量
+private:
+    Int m_value:
+};
+
+Test &Test::operator ++()
+{
+    m_value ++;    //先增量
+    return *this;  //返回当前对象
+}
+
+Test Test::operator ++(int)
+{
+    Test tmp(*this);  //创建临时对象
+    m_value ++;       //再增量
+    return temp;      //返回临时对象
+}
+```
+
+4. 因为强制转换是针对基本数据类型的，所以对类类型的转换需自定义；
+5. 转换运行符重载声明形式：operator 类型名();它没有返回类型，因为类型名就代表了它的返回类型，所以返回类型显得多余。
+6. 一般来说，转换运算符与转换构造函数（即带一个参数的构造函数）是互逆的，如有了构造函数Test(int)，那么最好有一个转换运算符int()。这样就不必提供对象参数重载运算符了，如Test a1(1);Test a2(2); Test a3; a3 = a1+a2；就不需要重载+号操作符了，因为对于a1+a2的运算，系统可能会先找有没有定义针对Test的+号操作符，如果没有，它就会找有没有针对Test类转换函数参数类型的+号操作符（因为可以将+号运行结果的类型通过转换函数转换为Test对象），因为Test类有个int类型的参数，对于int类型有+操作符，所以a1+a2真正执行的是Test(int(a1) + int(a2));即Test(3)；
+7. 对于转换运算符，还有一个需要注意的地方就是，如果A类中有以B为参数的转换函数（构造函数），那B中不能有A的转换运算符，不然就存在转换的二义性，如：
+
+```c++
+class A{A(B&){…}}; class B{ operator A(){…}};那么以下语句就会有问题：
+B b; A(b);//A(b)有就可能是A的构造函数，也可以是B的转换运算符
+```
+
+
+
 ## 十七、template
+
+#### C++模板
+
+　　模板是C++支持**参数化**多态的工具，使用模板可以使用户为类或者函数声明一种一般模式，使得类中的某些数据成员或者成员函数的参数、返回值取得任意类型。
+
+　　模板是一种对**类型**进行**参数化**的工具；
+
+　　通常有两种形式：**函数模板**和**类模板**；
+
+　　函数模板针对仅**参数类型**不同的**函数**；
+
+　　类模板针对仅**数据成员**和**成员函数类型**不同的类。
+
+　　**使用模板的目的就是能够让程序员编写与类型无关的代码。**比如编写了一个交换两个整型int 类型的swap函数，这个函数就只能实现**int** 型，对**double**，字符这些类型无法实现，要实现这些类型的交换就要重新编写另一个**swap**函数。使用模板的目的就是要让这程序的实现与类型无关，比如一个**swap**模板函数，即可以实现**int** 型，又可以实现double型的交换。模板可以应用于函数和类。下面分别介绍。
+
+　　**注意：模板的声明或定义只能在全局，命名空间或类范围内进行。即不能在局部范围，函数内进行，比如不能在main函数中声明或定义一个模板。**
+
+ 
+
+#### 1、函数模板通式
+
+1. 函数模板的格式：
+
+```c++
+template <class 形参名，class 形参名，......> 返回类型 函数名(参数列表)
+{
+　　　函数体
+}
+```
+
+　　其中**template**和**class**是关见字，**class**可以用**typename** 关见字代替，在这里**typename 和class没区别**，<>括号中的参数叫**模板形参**，模板形参和函数形参很相像，**模板形参不能为空。****一但声明了模板函数就可以用模板函数的形参名声明类中的成员变量和成员函数，即可以在该函数中使用内置类型的地方都可以使用模板形参名。**模板形参需要调用该模板函数时提供的模板实参来初始化模板形参，一旦编译器确定了实际的模板实参类型就称他实例化了函数模板的一个实例。比如**swap**的模板函数形式为
+
+```c++
+template <class T> void swap(T& a, T& b){}
+```
+
+​	当调用这样的模板函数时类型T就会被被调用时的类型所代替，比如**swap(a,b)**其中**a**和**b**是**int** 型，这时模板函数swap中的形参**T**就会被**int** 所代替，模板函数就变为**swap(int &a, int &b)**。而当**swap(c,d)**其中**c**和**d**是**double**类型时，模板函数会被替换为**swap(double &a, double &b)**，这样就实现了函数的实现与类型无关的代码。
+
+2. 注意：对于函数模板而言不存在 **h(int,int)** 这样的调用，**不能在函数调用的参数中指定模板形参的类型，对函数模板的调用应使用实参推演来进行**，即只能进行 **h(2,3)** 这样的调用，或者**int a, b; h(a,b)**。
+
+#### 2、类模板通式
+
+1. 类模板的格式为：
+
+```c++
+template<class  形参名，class 形参名，…>   class 类名
+{ ... };
+```
+
+　　类模板和函数模板都是以**template**开始后接模板形参列表组成，模板形参不能为空，**一但声明了类模板就可以用类模板的形参名声明类中的成员变量和成员函数，即可以在类中使用内置类型的地方都可以使用模板形参名来声明。**比如
+
+```c++
+template<class T> class A{public: T a; T b; T hy(T c, T &d);};
+```
+
+​	在类**A**中声明了两个类型为**T**的成员变量**a**和**b**，还声明了一个返回类型为**T**带两个参数类型为**T**的函数**hy**。
+
+2. 类模板对象的创建：比如一个模板类**A**，则使用类模板创建对象的方法为**A<int> m;**在类**A**后面跟上一个**<>**尖括号并在里面填上相应的类型，这样的话类**A**中凡是用到模板形参的地方都会被**int** 所代替。当类模板有两个模板形参时创建对象的方法为**A<int, double> m;**类型之间用逗号隔开。
+3. 对于类模板，模板形参的类型必须在类名后的尖括号中明确指定。比如**A<2> m;**用这种方法把模板形参设置为**int**是错误的（**编译错误：error C2079: 'a' uses undefined class 'A<int>'**），**类模板形参不存在实参推演的问题。**也就是说不能把整型值**2**推演为**int**型传递给模板形参。要把类模板形参调置为**int** 型必须这样指定**A<int> m**。
+
+4. 在类模板外部定义成员函数的方法为：
+
+```c++
+template<模板形参列表> 函数返回类型 类名<模板形参名>::函数名(参数列表){函数体}
+```
+
+比如有两个模板形参**T1**，**T2**的类**A**中含有一个**void h()**函数，则定义该函数的语法为：
+
+```c++
+template<class T1,class T2> void A<T1,T2>::h(){}
+```
+
+​	注意：当在类外面定义类的成员时**template**后面的模板形参应与要定义的类的模板形参一致。
+
+5. 再次提醒注意：模板的声明或定义只能在全局，命名空间或类范围内进行。即不能在局部范围，函数内进行，比如不能在**main**函数中声明或定义一个模板。
+
+#### 3、模板的形参
+
+​	**有三种类型的模板形参：类型形参，非类型形参和模板形参。**
+
+1. 类型形参
+
+- 类型模板形参：**类型形参由关见字class或typename后接说明符构成**，如**template<class T> void h(T a){}**;其中**T**就是一个类型形参，类型形参的名字由用户自已确定。**模板形参表示的是一个未知的类型**。模板类型形参可作为类型说明符用在模板中的任何地方，与内置类型说明符或类类型说明符的使用方式完全相同，即可以用于指定返回类型，变量声明等。
+
+- 不能为同一个模板类型形参指定两种不同的类型，比如**template<class T>void h(T a, T b){}，**语句调用**h(2, 3.2)**将出错，因为该语句给同一模板形参**T**指定了两种类型，第一个实参**2**把模板形参T指定为**int**，而第二个实参**3.2**把模板形参指定为**double**，两种类型的形参不一致，会出错。**（针对函数模板）**
+
+- 针对函数模板是正确的，但是忽略了类模板。当我们声明类对象为：**A<int> a**，比如**template<class T>T g(T a, T b){}**，语句调用**a.g(2, 3.2)**在编译时不会出错，但会有警告，因为在声明类对象的时候已经将**T**转换为**int**类型，而第二个实参**3.2**把模板形参指定为**double**，在运行时，会对**3.2**进行强制类型转换为**3**。当我们声明类的对象为：**A<double> a**,此时就不会有上述的警告，因为从**int**到**double**是自动类型转换。
+
+2. 非类型形参
+
+- 非类型模板形参：**模板的非类型形参也就是内置类型形参**，如**template<class T, int a> class B{};**其中**int a**就是非类型的模板形参。
+
+- 非类型形参在模板定义的内部是常量值，也就是说非类型形参在模板的内部是常量。
+
+- **非类型模板的形参只能是整型，指针和引用，像double，String, String \**这样的类型是不允许的。**但是**double &，double \*，**对象的引用或指针是正确的。
+
+- **调用非类型模板形参的实参必须是一个常量表达式**，即他必须能在编译时计算出结果。
+
+- 注意：**任何局部对象，局部变量，局部对象的地址，局部变量的地址都不是一个常量表达式，都不能用作非类型模板形参的实参**。全局指针类型，全局变量，全局对象也不是一个常量表达式，不能用作非类型模板形参的实参。
+
+- **全局变量的地址或引用，全局对象的地址或引用const类型变量是常量表达式，可以用作非类型模板形参的实参**。
+
+- **sizeof**表达式的结果是一个常量表达式，也能用作非类型模板形参的实参。
+
+- 当模板的形参是整型时调用该模板时的实参必须是整型的，且在编译期间是常量，比如**template <class T, int a> class A{};**如果有**int b，这时A<int, b> m;**将出错，因为**b**不是常量，如果**const int b，这时A<int, b> m**;就是正确的，因为这时**b**是常量。
+
+- **非类型形参一般不应用于函数模板中**，比如有函数模板**template<class T, int a> void h(T b){}**，若使用**h(2)**调用会出现无法为非类型形参a推演出参数的错误，对这种模板函数可以用显示模板实参来解决，如用h<int, 3>(2)这样就把非类型形参a设置为整数3。显示模板实参在后面介绍。
+- 非类型模板形参的形参和实参间所允许的转换
+
+1. 允许从数组到指针，从函数到指针的转换。如：template <int \*a> class A{}; int b[1]; A<b> m;即数组到指针的转换
+2. const修饰符的转换。如：template<const int \*a> class A{}; int b; A<&b> m;   即从int *到const int *的转换。
+3. 提升转换。如：template<int a> class A{}; const short b=2; A<b> m; 即从short到int 的提升转换
+4. 整值转换。如：template<unsigned int a> class A{};   A<3> m; 即从int 到unsigned int的转换
+5. 常规转换。
 
 ## 十八、decltype
 
+​	decltype和auto都可以用来推断类型，但是二者有几处明显的差异：1.auto忽略顶层const，decltype保留顶层const；2.对引用操作，auto推断出原有类型，decltype推断出引用；3.对解引用操作，auto推断出原有类型，decltype推断出引用；4.auto推断时会实际执行，decltype不会执行，只做分析。总之在使用中过程中和const、引用和指针结合时需要特别小心。 
+
+1.基本用法
+
+```c++
+int getSize();
+int main(void)
+{
+    int tempA = 2;
+    
+    /*1.dclTempA为int*/
+    decltype(tempA) dclTempA;
+    /*2.dclTempB为int，对于getSize根本没有定义，但是程序依旧正常，因为decltype只做分析，并不调用getSize，*/
+    decltype(getSize()) dclTempB;
+
+    return 0;
+}
+```
+
+　　2.与const结合
+
+```c++
+    double tempA = 3.0;
+    const double ctempA = 5.0;
+    const double ctempB = 6.0；
+    const double *const cptrTempA = &ctempA;
+    
+    /*1.dclTempA推断为const double（保留顶层const，此处与auto不同）*/
+    decltype(ctempA) dclTempA = 4.1;
+    /*2.dclTempA为const double，不能对其赋值，编译不过*/
+    dclTempA = 5;
+    /*3.dclTempB推断为const double * const*/
+    decltype(cptrTempA) dclTempB = &ctempA;
+    /*4.输出为4（32位计算机）和5*/
+    cout<<sizeof(dclTempB)<<"    "<<*dclTempB<<endl;
+    /*5.保留顶层const，不能修改指针指向的对象，编译不过*/
+    dclTempB = &ctempB;
+    /*6.保留底层const，不能修改指针指向的对象的值，编译不过*/
+    *dclTempB = 7.0;
+```
+
+　　3.与引用结合
+
+```c++
+    int tempA = 0, &refTempA = tempA;
+
+    /*1.dclTempA为引用，绑定到tempA*/
+    decltype(refTempA) dclTempA = tempA;
+    /*2.dclTempB为引用，必须绑定到变量，编译不过*/
+    decltype(refTempA) dclTempB = 0;
+    /*3.dclTempC为引用，必须初始化，编译不过*/
+    decltype(refTempA) dclTempC;
+    /*4.双层括号表示引用，dclTempD为引用，绑定到tempA*/
+    decltype((tempA)) dclTempD = tempA;
+    
+    const int ctempA = 1, &crefTempA = ctempA;
+    
+    /*5.dclTempE为常量引用，可以绑定到普通变量tempA*/
+    decltype(crefTempA) dclTempE = tempA;
+    /*6.dclTempF为常量引用，可以绑定到常量ctempA*/
+    decltype(crefTempA) dclTempF = ctempA;
+    /*7.dclTempG为常量引用，绑定到一个临时变量*/
+    decltype(crefTempA) dclTempG = 0;
+    /*8.dclTempH为常量引用，必须初始化，编译不过*/
+    decltype(crefTempA) dclTempH;
+    /*9.双层括号表示引用,dclTempI为常量引用，可以绑定到普通变量tempA*/
+    decltype((ctempA))  dclTempI = ctempA;
+```
+
+　　4.与指针结合
+
+```c++
+    int tempA = 2;
+    int *ptrTempA = &tempA;
+    /*1.常规使用dclTempA为一个int *的指针*/
+    decltype(ptrTempA) dclTempA;
+    /*2.需要特别注意，表达式内容为解引用操作，dclTempB为一个引用，引用必须初始化，故编译不过*/
+    decltype(*ptrTempA) dclTempB;
+```
+
 ## 十九、throw、try、catch
 
+可参考：[异常处理：try,catch,throw,finally的用法](https://www.cnblogs.com/crazyacking/p/4951638.htmlC++) 
+
 ## 二十、virtual
+
+#### 1、虚函数与运行多态
+
+首先看一个简单的例子：
+
+```c++
+#include<iostream>
+using namespace std;
+class Base
+{
+public:
+    virtual void show() { cout<<" In Base \n"; }
+};
+class Derived: public Base
+{
+public:
+    void show() { cout<<"In Derived \n"; }
+};
+
+int main(void)
+{
+    // 基类指针指向子类对象
+    Base *bp = new Derived;
+    bp->show();  // RUN-TIME POLYMORPHISM
+    return 0;
+}
+```
+
+输出结果为：
+
+```c++
+In Derived
+```
+
+> **结论： 虚函数的调用取决于指向或者引用的对象的类型，而不是指针或者引用自身的类型。**
+>
+
+虚函数控制下的运行多态有什么用？
+
+假如我们在公司的人事管理系统中定义了一个基类 Employee(员工)，里面包含了升职、加薪等虚函数。 由于Manager(管理人员)和Engineer(工程人员)的加薪和晋升流程是不一样的，因此我们需要实现一些继承类并重写这些函数。
+
+有了上面这些以后，到了一年一度每个人都要加薪的时候，我们只需要一个简单的操作就可以完成，如下所示：
+
+```c++
+void globalRaiseSalary(Employee *emp[], int n)
+{
+    for (int i = 0; i < n; i++)
+        emp[i]->raiseSalary();                                 
+}
+```
+
+**总结： 虚函数使得我们可以创建一个统一的基类指针列表，并且调用不同子类的函数而无需知道子类对象究竟是什么。**
+
+虚函数表与虚函数指针
+
+程序是如何知道在运行时该调用基类还是子类的函数？ 这涉及到虚函数表和虚函数指针的概念。更多可以参考《C++ 虚函数表解析》。
+
+vtable(虚函数表)： 每一个含有虚函数的类都会维护一个虚函数表，里面按照声明顺序记录了虚函数的地址。
+vptr(虚函数指针)： 一个指向虚函数表的指针，每个对象都会拥有这样的一个指针。
+插入一个例子：
+
+```c++
+class A
+{
+public:
+    virtual void fun();
+};
+class B
+{
+public:
+   void fun();
+};
+
+sizeof(A) > sizeof(B) // 因为A比B多了一个虚函数指针
+```
+
+这个时候我们再来看刚刚那个加薪的例子，其多态调用的形式如下图所示：
+
+![img](https://img-blog.csdn.net/20170814104505598?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2h1emZhbg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast) 
+
+其核心要素还是我们一开始提到的结论：虚函数的调用取决于指向或者引用的对象的类型，而不是指针或者引用自身的类型。
+
+#### 2、虚函数中默认参数
+
+先看下面一段代码：
+
+```c++
+#include <iostream>
+using namespace std;
+class Base
+{
+public:
+    virtual void fun ( int x = 0 )
+    {
+        cout << "Base::fun(), x = " << x << endl;
+    }
+};
+class Derived : public Base
+{
+public:
+    // 这里的virtual关键字可以省略，因为只要基类里面被声明为虚函数，那么在子类中默认都是虚的
+    // 或者定义为 virtual void fun ( int x = 10)
+    virtual void fun ( int x )
+    {
+        cout << "Derived::fun(), x = " << x << endl;
+    }
+};
+int main()
+{
+    Derived d1;
+    Base *bp = &d1;
+    bp->fun();
+    return 0;
+}
+```
+
+上述代码的输出始终为
+
+```c++
+Derived::fun(), x = 0
+```
+
+解释与总结：
+
+默认参数不包含在函数签名里。 (函数签名定义了函数的输入与输出，包括参数及参数的类型、返回值及其类型、可能会抛出或传回的exceptions、该方法在面向对象程序中的可用性方面的信息诸如public、static或prototype等关键字等)
+
+默认参数是静态绑定的，虚函数是动态绑定的。 默认参数的使用需要看指针或者引用本身的类型，而不是对象的类型。
+
+绝不重新定义继承而来的缺省参数（Never redefine function’s inherited default parameters value.）
+
+#### 3、静态函数可以声明为虚函数吗？
+
+静态函数不可以声明为虚函数，同时也不能被const 和 volatile关键字修饰。
+
+比如下面的声明都是错误的：
+
+```c++
+virtual static void fun()  { }
+static void fun() const { }
+```
+
+原因主要有两方面：
+
+static成员函数不属于任何类对象或类实例，所以即使给此函数加上virutal也是没有任何意义
+虚函数依靠vptr和vtable来处理。vptr是一个指针，在类的构造函数中创建生成，并且只能用this指针来访问它，静态成员函数没有this指针，所以无法访问vptr。
+#### 4、构造函数可以为虚函数吗？
+
+构造函数不可以声明为虚函数。同时除了inline之外，构造函数不允许使用其它任何关键字。
+
+为什么构造函数不可以为虚函数？
+
+尽管虚函数表vtable是在编译阶段就已经建立的，但指向虚函数表的指针vptr是在运行阶段实例化对象时才产生的。 如果类含有虚函数，编译器会在构造函数中添加代码来创建vptr。 问题来了，如果构造函数是虚的，那么它需要vptr来访问vtable，可这个时候vptr还没产生。 因此，构造函数不可以为虚函数。
+我们之所以使用虚函数，是因为需要在信息不全的情况下进行多态运行。而构造函数是用来初始化实例的，实例的类型必须是明确的。 因此，构造函数没有必要被声明为虚函数。
+
+尽管构造函数不可以为虚函数，但是有些场景下我们确实需要 “Virtual Copy Constructor”。 “虚复制构造函数”的说法并不严谨，其只是一个实现了对象复制的功能的类内函数。 举一个应用场景，比如剪切板功能。 复制内容作为基类，但派生类可能包含文字、图片、视频等等。 我们只有在程序运行的时候才知道我们需要复制的具体是什么类型的数据。 实现方法如下：
+
+```c++
+class Base
+{
+    public:
+        Base() {};
+        virtual ~Base() {};
+        virtual Base* Clone() {return new Base(*this);} 
+};
+
+class Derived
+{
+    public:
+        Derived() {};
+        virtual ~Derived() {};
+        virtual Base* Clone() {return new Derived(*this);}
+};
+```
+
+调用方法如下：
+
+```c++
+Derived d;
+Base* p = d.clone(); //p实际指向的是一个继承类对象，并且该对象和d完全一样，这就实现了copy
+delete p;
+```
+
+下面着重解释下 return new Derived(*this)这句话。
+
+“this”是待被复制的对象的地址，“*this”相当于解地址引用。 所以“*this”的类型是 “Derived &”，是待被复制的对象的引用。 所以上面这句话的意思是： 先用new开一块空间，然后用copy构造函数 Derived(const Derived &)来初始化这块内存。 由于用户没有定义copy构造函数，因此调用编译器产生的默认copy构造函数。
+
+#### 5、析构函数可以为虚函数吗？
+
+析构函数可以声明为虚函数。如果我们需要删除一个指向派生类的基类指针时，应该把析构函数声明为虚函数。 事实上，只要一个类有可能会被其它类所继承， 就应该声明虚析构函数(哪怕该析构函数不执行任何操作)。
+
+看下面的例子：
+
+```c++
+#include<iostream>
+using namespace std;
+class base {
+  public:
+    base()     
+    { cout<<"Constructing base \n"; 
+    // virtual ~base()
+    ~base()
+    { cout<<"Destructing base \n"; }      
+};
+
+class derived: public base {
+  public:
+    derived()     
+    { cout<<"Constructing derived \n"; }
+    ~derived()
+    { cout<<"Destructing derived \n"; }
+};
+int main(void)
+{
+  derived *d = new derived();  
+  base *b = d;
+  delete b;
+  getchar();
+  return 0;
+}
+```
+
+可能的输出结果如下(不同编译器可能有差别)：
+
+```c++
+Constructing base
+Constructing derived
+Destructing base
+```
+
+可见，继承类的析构函数没有被调用，delete时只根据指针类型调用了基类的析构函数。 正确的操作是，基类和继承类的析构函数都应该被调用，解决方法是将基类的析构函数声明为虚函数。
+
+#### 6、虚函数可以为私有函数吗？
+
+虚函数可以被私有化，但有一些细节需要注意。
+
+```c++
+#include<iostream>
+using namespace std;
+class Derived;
+class Base {
+private:
+    virtual void fun() { cout << "Base Fun"; }
+friend int main();
+};
+class Derived: public Base {
+public:
+    void fun() { cout << "Derived Fun"; }
+};
+
+int main()
+{
+   Base *ptr = new Derived;
+   ptr->fun();
+   return 0;
+}
+```
+
+输出结果为：
+
+```c++
+Derived fun()
+```
+
+基类指针指向继承类对象，则调用继承类对象的函数；
+int main()必须声明为Base类的友元，否则编译失败。 编译器报错： ptr无法访问私有函数。 当然，把基类声明为public， 继承类为private，该问题就不存在了。
+####  7、虚函数可以被内联吗？
+
+通常类成员函数都会被编译器考虑是否进行内联。 但通过基类指针或者引用调用的虚函数必定不能被内联。 当然，实体对象调用虚函数或者静态调用时可以被内联，虚析构函数的静态调用也一定会被内联展开。 (参考《虚函数什么情况下会内联》)
+
+```c++
+#include <iostream>
+using namespace std;
+class Base
+{
+public:
+    virtual void who()
+    {
+		cout << "I am Base\n";
+    }
+};
+
+class Derived: public Base
+{
+public:
+    void who()
+    { 
+        cout << "I am Derived\n";
+    }
+};
+
+int main()
+{
+    Base b;
+    b.who(); // 内联调用
+    Base *ptr = new Derived();
+    ptr->who(); // 通过基类指针调用，一定不会进行内联   
+    return 0;
+}
+```
+
+#### 7、纯虚函数与抽象类
+
+纯虚函数： 在基类中声明但不定义的虚函数，但要求任何派生类都要定义自己的实现方法。在基类中实现纯虚函数的方法是在函数原型后加“=0”，如virtual void funtion1()=0；
+
+抽象类： 含有纯虚函数的类为抽象类。
+
+下面是一个简单的抽象类的例子;
+
+```c++
+#include<iostream>
+using namespace std;
+class Base
+{
+   int x;
+public:
+    virtual void fun() = 0;
+    int getX() { return x; }
+};
+// 继承并重写基类声明的纯虚函数，如果没有重写，则该继承类也为抽象类
+class Derived: public Base
+{
+    int y;
+public:
+    void fun() { cout << "fun() called"; }
+};
+int main(void)
+{
+    Derived d;
+    d.fun();
+    return 0;
+}
+```
+
+纯虚函数的特点以及用途总结如下
+
+必须在继承类中重新声明该函数(实现可以为空)，否则继承类仍为抽象类，程序无法编译通过；
+派生类仅仅只是继承纯虚函数的接口，因此使用纯虚函数可以规范接口形式。
+声明纯虚函数的基类无法实例化对象。 在很多情况下，基类本身生成对象是不合情理的。例如，动物作为一个基类可以派生出老虎、孔雀等子类，但动物本身生成对象明显不合常理。为了解决上述问题，引入了纯虚函数，编译器要求在派生类中必须予以重写以实现多态性。
+纯虚函数的声明就是在告诉子类的设计者，“你必须提供一个纯虚函数的实现，但我不知道你会怎样实现它”。
+可以使用指针或者引用指向抽象类性，比如下面的代码：
+```c++
+#include<iostream>
+using namespace std;
+class Base
+{
+public:
+    virtual void show() = 0;
+};
+class Derived: public Base
+{
+public:
+    void show() { cout << "In Derived \n"; }
+};
+int main(void)
+{
+    Base *bp = new Derived();
+    bp->show();
+    return 0;
+}
+```
+
+抽象类可以拥有构造函数。示例如下：
+```c++
+#include<iostream>
+using namespace std;
+// An abstract class with constructor
+class Base
+
+protected:
+   int x;
+public:
+  virtual void fun() = 0;
+  Base(int i) { x = i; }
+};
+class Derived: public Base
+{
+    int y;
+public:
+    Derived(int i, int j):Base(i) { y = j; }
+	void fun() { cout << "x = " << x << ", y = " << y; }
+};
+int main(void)
+{
+    Derived d(4, 5);
+    d.fun();
+    return 0;
+}
+```
+
+析构函数被声明为纯虚函数是一种特例，允许其有具体实现。 (有些时候，想要使一个类成为抽象类，但刚好又没有任何纯虚函数。最简单的方法就是声明一个纯虚析构函数。)
+```c++
+#include <iostream>
+class Base
+{
+public:
+    virtual ~Base()=0; // 纯虚析构函数
+};
+Base::~Base()
+{
+    std::cout << "Pure virtual destructor is called";
+}
+class Derived : public Base
+{
+public:
+    ~Derived()
+    {
+        std::cout << "~Derived() is executed\n";
+    }
+};
+int main()
+{
+    Base *b = new Derived();
+    delete b;
+    return 0;
+}
+```
+
+
 
 
 
